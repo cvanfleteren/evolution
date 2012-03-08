@@ -4,7 +4,7 @@ import scala.util.Random
 
 object RandomUtils {
 
-	val RANDOM = new Random();
+	private val RANDOM = new Random();
 
 	def randomString(length: Int, chars: String): String = {
 		val buf = new StringBuilder();

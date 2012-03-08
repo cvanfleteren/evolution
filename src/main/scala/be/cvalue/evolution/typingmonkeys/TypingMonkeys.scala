@@ -52,11 +52,8 @@ object TypingMonkeys extends App {
 	class TextOrganism(val dna: TextDna) extends Organism {
 
 		type ThisOrganism = TextOrganism
-		type SomeDna = TextDna
 
-		def reproduce = {
-			List.fill(100)(new TextOrganism(dna.copy))
-		}
+		def reproduce = List.fill(100)(new TextOrganism(dna.copy))
 
 		override def toString = dna.text
 	}
