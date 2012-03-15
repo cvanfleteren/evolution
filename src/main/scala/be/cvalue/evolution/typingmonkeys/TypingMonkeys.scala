@@ -1,30 +1,31 @@
 package be.cvalue.evolution.typingmonkeys
 
-import be.cvalue.evolution.RandomUtils._
+import be.cvalue.evolution.support.{AbstractNature}
+import be.cvalue.evolution.support.RandomUtils._
 
 import scala.math._
-import be.cvalue.evolution.{Evolution, Organism, Dna}
-import be.cvalue.evolution.support.AbstractNature
+import be.cvalue.evolution.{Organism, Dna}
+import akka.actor.{ActorSystem, Props}
+import akka.routing.RoundRobinRouter
 
 object TypingMonkeys extends App {
 
-	val CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ "
-	val GOAL = "TO BE OR NOT TO BE THAT IS THE QUESTION"
 
+	val system = ActorSystem("MySystem")
+	val monkeys = system.actorOf(Props[TypingMonkeyActor].withRouter(RoundRobinRouter(nrOfInstances = 8)))
+	val progressActor = system.actorOf(Props[ProgressActor], name="ProgressActor")
 
-	val evolution = new Evolution {
-		val nature = new TextNature
+	for (i <- 1 to 1) {
+		monkeys ! EvolutionAttempt("Dit is een test van de brandweerinstallatie. Blijf waar je bent, er is geen enkel gevaar.")
 	}
-
-	evolution.evolve(new TextOrganism(new TextDna("ZZZZ")))
-	println("Stopped evolving after "+evolution.nature.generationCount+" generations")
-
 
 
 	class TextDna(val text: String) extends Dna {
+		val CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz, 1234567890."
+
 		type ThisDna = TextDna
 
-		def copy: ThisDna = {
+		def copy: TextDna = {
 			val buf = new StringBuilder(text);
 
 			// add a bit of mutation to the copy
@@ -53,18 +54,18 @@ object TypingMonkeys extends App {
 
 		type ThisOrganism = TextOrganism
 
-		def reproduce = List.fill(100)(new TextOrganism(dna.copy))
+		def reproduce = List.fill(75)(new TextOrganism(dna.copy))
 
 		override def toString = dna.text
 	}
 
-	class TextNature extends AbstractNature {
+	class TextNature(goal:String) extends AbstractNature {
 
 		type SomeOrganism = TextOrganism
 
 		def doNaturalSelection(currentGeneration: List[TextOrganism]) =  List(currentGeneration.maxBy(fitnessOf(_)))
 
-		def canEvolve(organisms: List[TextOrganism]) = organisms.filter(_.dna.text == GOAL).isEmpty
+		def canEvolve(organisms: List[TextOrganism]) = organisms.filter(_.dna.text == goal).isEmpty
 
 		def offSpring(organism: TextOrganism) = organism.reproduce
 
@@ -72,12 +73,12 @@ object TypingMonkeys extends App {
 
 			var fitness = 0;
 
-			fitness += min(GOAL.length(), organism.dna.text.length()) -
-				max(GOAL.length(), organism.dna.text.length());
+			fitness += min(goal.length(), organism.dna.text.length()) -
+				max(goal.length(), organism.dna.text.length());
 
 			var i = 0
-			while (i < organism.dna.text.length() && i < GOAL.length()) {
-				if (organism.dna.text.charAt(i) == GOAL.charAt(i)) {
+			while (i < organism.dna.text.length() && i < goal.length()) {
+				if (organism.dna.text.charAt(i) == goal.charAt(i)) {
 					fitness += 1;
 				}
 				i += 1;

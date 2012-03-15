@@ -1,4 +1,4 @@
-package be.cvalue.evolution
+package be.cvalue.evolution.support
 
 import scala.util.Random
 
@@ -16,9 +16,9 @@ object RandomUtils {
 		return buf.toString();
 	}
 
-	def randomInt(max: Int) : Int  =  RANDOM.nextInt(max);
+	def randomInt(max: Int): Int = RANDOM.nextInt(max);
 
-	def randomChar(chars: String) : Char = chars.charAt(randomInt(chars.length()));
+	def randomChar(chars: String): Char = chars.charAt(randomInt(chars.length()));
 
 	def randomBoolean() = RANDOM.nextBoolean();
 }
